@@ -1,0 +1,175 @@
+package uiAutomation.selenium;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.FluentWait;
+import org.openqa.selenium.support.ui.Wait;
+import org.testng.Assert;
+
+import java.time.Duration;
+import java.util.List;
+
+public class UiWaitOperations {
+    private static List<WebElement> elements;
+    private static WebElement element;
+    private static WebDriver driver ;
+    private static By selector;
+    private static Wait<WebDriver> wait;
+    private static int explicitWait;
+    private static int fluentWait;
+
+    public UiWaitOperations(WebDriver driver){
+        UiWaitOperations.driver = driver;
+    }
+    public By selector(String locator) {
+        try {
+            String locatorSignature = locator.split("__")[1];
+            String locatorValue = locator.split("__")[0];
+            switch (locatorSignature) {
+                case "xpath":
+                    selector = By.xpath(locatorValue);
+                    break;
+                case "id":
+                    selector = By.id(locatorValue);
+                    break;
+                case "cssSelector":
+                    selector = By.cssSelector(locatorValue);
+                    break;
+                case "name":
+                    selector = By.name(locatorValue);
+                    break;
+                case "partialLinkText":
+                    selector = By.partialLinkText(locatorValue);
+                    break;
+                case "className":
+                    selector = By.className(locatorValue);
+                    break;
+                case "tagName":
+                    selector = By.tagName(locatorValue);
+                    break;
+                default:
+                    selector = By.linkText(locatorValue);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return selector;
+    }
+    public WebElement findElement(String locator){
+        try {
+            element = driver.findElement(selector(locator));
+            Assert.assertTrue(true,"successfully found element "+element);
+            System.out.println("successfully found element "+element);
+        } catch (Exception e) {
+            Assert.assertFalse(false,"element not found "+element);
+            e.printStackTrace();
+        }
+        return element;
+    }
+    public List<WebElement> findElements(String locator){
+        try {
+            elements = driver.findElements(selector(locator));
+            Assert.assertTrue(true,"successfully found elements "+elements);
+            System.out.println("successfully found elements "+elements);
+        } catch (Exception e) {
+            Assert.assertFalse(false,"elements not found "+elements);
+            e.printStackTrace();
+        }
+        return elements;
+    }
+    public Wait<WebDriver> waiting() {
+        if (wait == null) {
+            try {
+                wait = new FluentWait<>(driver)
+                        .withTimeout(Duration.ofSeconds(explicitWait))
+                        .pollingEvery(Duration.ofSeconds(fluentWait))
+                        .ignoring(NoSuchElementException.class);
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+        }
+        return wait;
+    }
+    public void waitUntilAlertIsPresent(){
+        try{
+            waiting().until(ExpectedConditions.alertIsPresent());
+            Assert.assertTrue(true,"Waited till alert is present");
+            System.out.println("Waited till alert is present");
+        }catch(Exception e){
+            Assert.assertFalse(false,"alert not found");
+            e.printStackTrace();
+
+        }
+    }
+    public void waitUntilTitleIs(String title){
+        try{
+            waiting().until(ExpectedConditions.titleIs(title));
+            Assert.assertTrue(true,"waited till title is "+title);
+            System.out.println("waited till title is "+title);
+        }catch(Exception e){
+            Assert.assertFalse(false,"title not "+title);
+            e.printStackTrace();
+        }
+    }
+    public void waitUntilAttributeContains(String locator, String attribute, String value){
+
+        try{
+            waiting().until(ExpectedConditions.attributeContains(selector(locator),attribute,value));
+            Assert.assertTrue(true,"waited till locator "+locator+" attribute "+attribute+" contains "+value);
+            System.out.println("waited till locator "+locator+" attribute "+attribute+" contains "+value);
+        }catch(Exception e){
+            Assert.assertFalse(false,"attribute "+attribute+" not contains value "+value);
+            e.printStackTrace();
+        }
+    }
+    public void waitUntilAttributeContains(WebElement element, String attribute, String value){
+        try{
+            waiting().until(ExpectedConditions.attributeContains(element,attribute,value));
+            Assert.assertTrue(true,"waited till web element "+element+" attribute "+attribute+" contains "+value);
+            System.out.println("waited till web element "+element+" attribute "+attribute+" contains "+value);
+        }catch(Exception e){
+            Assert.assertFalse(false,"attribute "+attribute+" not contains value "+value);
+            e.printStackTrace();
+        }
+    }
+    public void waitUntilElementClickable(String locator){
+        try{
+            waiting().until(ExpectedConditions.elementToBeClickable(selector(locator)));
+            Assert.assertTrue(true,"waited till locator "+locator+" will be clickable");
+            System.out.println("waited till locator "+locator+" will be clickable");
+        }catch(Exception e){
+            Assert.assertFalse(false,locator+" not clickable");
+            e.printStackTrace();
+        }
+    }
+    public void waitUntilElementClickable(WebElement element){
+        try{
+            waiting().until(ExpectedConditions.elementToBeClickable(element));
+            Assert.assertTrue(true,"waited till locator "+element+" will be clickable");
+            System.out.println("waited till web element "+element+"is clickable");
+        }catch(Exception e){
+            e.printStackTrace();
+            Assert.assertFalse(false,element+" not clickable");
+        }
+    }
+    public void waitUntilAttributeToBe(String locator,String attribute,String value){
+        try{
+            waiting().until(ExpectedConditions.attributeToBe(selector(locator),attribute,value));
+            System.out.println("waited till attribute "+attribute+" value to be "+value);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+    public void waitUntilVisible(String locator){
+        try{
+            WebElement element = findElement(locator);
+            waiting().until(ExpectedConditions.visibilityOf(element));
+            System.out.println("waited till element "+ element +" is visible");
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+}
